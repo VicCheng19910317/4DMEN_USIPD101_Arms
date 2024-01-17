@@ -1,0 +1,229 @@
+ENVT0100,LM:2024/01/08 08:42:20:876,DS:0000003284,CS:25441,MA:CC-82-7F-4C-12-B0,EI:           
+sActiveChild="robot_bass.pts"
+bMdiMaximized=False
+nProgramFileCount=1
+ProgramFile1 {
+	sName="USI_Bending_Assembl.prg"
+	bOpened=True
+	nWinState=0
+	Window {
+		nLeft=83
+		nTop=34
+		nWidth=1015
+		nHeight=803
+	}
+}
+nIncludeFileCount=0
+nPointFileCount=3
+PointFile1 {
+	sName="robot_bass.pts"
+	bOpened=True
+	nWinState=0
+	Window {
+		nLeft=313
+		nTop=35
+		nWidth=1017
+		nHeight=555
+	}
+}
+PointFile2 {
+	sName="BEND_ASSEM_TE.pts"
+	bOpened=False
+	nWinState=0
+	Window {
+		nLeft=0
+		nTop=0
+		nWidth=0
+		nHeight=0
+	}
+}
+PointFile3 {
+	sName="BENDAS_TEACH_TAG.pts"
+	bOpened=False
+	nWinState=0
+	Window {
+		nLeft=0
+		nTop=0
+		nWidth=0
+		nHeight=0
+	}
+}
+nForceFileCount=0
+sActiveWindow="main.prg"
+CmdWindow {
+	bOpened=False
+	Window {
+		nLeft=0
+		nTop=0
+		nWidth=0
+		nHeight=0
+	}
+	nWinState=0
+}
+RunWindow {
+	bOpened=False
+	Window {
+		nLeft=52
+		nTop=159
+		nWidth=718
+		nHeight=300
+	}
+	nWinState=2
+	nNumOfDisplays=1
+	nSplitterDistance=513
+	Display1 {
+		nCamera=0
+		sSequences="1"
+	}
+	Display2 {
+		nCamera=0
+		sSequences="1"
+	}
+	Display3 {
+		nCamera=0
+		sSequences="1"
+	}
+	Display4 {
+		nCamera=0
+		sSequences="1"
+	}
+	Display5 {
+		nCamera=0
+		sSequences="1"
+	}
+	Display6 {
+		nCamera=0
+		sSequences="1"
+	}
+}
+IOLabelEditor {
+	bOpened=False
+	Window {
+		nLeft=333
+		nTop=171
+		nWidth=833
+		nHeight=486
+	}
+	nWinState=0
+}
+IOMonitor {
+	bOpened=False
+	Window {
+		nLeft=876
+		nTop=174
+		nWidth=500
+		nHeight=638
+	}
+}
+Simulator {
+	bOpened=False
+	Window {
+		nLeft=78
+		nTop=78
+		nWidth=1312
+		nHeight=480
+	}
+}
+TaskMgr {
+	bOpened=False
+	Window {
+		nLeft=1383
+		nTop=756
+		nWidth=478
+		nHeight=259
+	}
+}
+Macros {
+	bOpened=False
+	Window {
+		nLeft=716
+		nTop=302
+		nWidth=488
+		nHeight=429
+	}
+}
+RobotMgr {
+	bOpened=False
+	Window {
+		nLeft=388
+		nTop=188
+		nWidth=702
+		nHeight=494
+	}
+}
+UserErrorEditor {
+	bOpened=False
+	Window {
+		nLeft=14
+		nTop=37
+		nWidth=1311
+		nHeight=494
+	}
+	nWinState=0
+}
+VisionGuide {
+	bOpened=False
+	Window {
+		nLeft=170
+		nTop=33
+		nWidth=1216
+		nHeight=594
+	}
+	nWinState=0
+	bShowFlowChart=True
+	nSplitterDistance1=796
+	nSplitterDistance2=599
+	nSplitterDistance3=381
+	nSplitterDistance4=247
+	nSplitterDistance5=430
+}
+ForceGuide {
+	bOpened=False
+	Window {
+		nLeft=0
+		nTop=0
+		nWidth=0
+		nHeight=0
+	}
+	nWinState=0
+	bShowFlowChart=True
+	nSplitterDistance1=0
+	nSplitterDistance2=0
+	nSplitterDistance3=0
+	nSplitterDistance4=0
+	nSplitterDistance5=0
+	nSelectedTab=0
+}
+GUIBuilder {
+	bOpened=False
+	Window {
+		nLeft=0
+		nTop=2
+		nWidth=870
+		nHeight=575
+	}
+	nWinState=0
+	nSplitterDistance1=607
+	nSplitterDistance2=312
+	nSplitterDistance3=134
+	nSplitterDistance4=440
+}
+ProjectExplorer {
+	bProgramsOpened=True
+	bIncludesOpened=True
+	bLabelsOpened=True
+	bMacrosOpened=True
+	bFunctionsOpened=True
+	bVisionOpened=True
+	bVisionSequencesOpened=False
+	bVisionCalibsOpened=False
+	bGUIBOpened=True
+	bGUIBFormsOpened=False
+	bRobotPointsOpened=True
+	bCommonPointsOpened=True
+	bForcesOpened=True
+	bCommonForcesOpened=False
+	bRobotsOpened1=True
+	bForceGuideOpened=True
+	bForceSequencesOpened=False
+}

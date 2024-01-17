@@ -1,0 +1,218 @@
+ENVT0100,LM:2024/01/08 08:44:50:798,DS:0000003151,CS:05420,MA:CC-82-7F-4C-12-B0,EI:           
+sActiveChild="USI_Bending_In.prg"
+bMdiMaximized=False
+nProgramFileCount=1
+ProgramFile1 {
+	sName="USI_Bending_In.prg"
+	bOpened=True
+	nWinState=0
+	Window {
+		nLeft=-7
+		nTop=29
+		nWidth=908
+		nHeight=781
+	}
+}
+nIncludeFileCount=0
+nPointFileCount=2
+PointFile1 {
+	sName="pickrobot.pts"
+	bOpened=False
+	nWinState=0
+	Window {
+		nLeft=-23
+		nTop=38
+		nWidth=1043
+		nHeight=400
+	}
+}
+PointFile2 {
+	sName="BEND_CH.pts"
+	bOpened=False
+	nWinState=0
+	Window {
+		nLeft=286
+		nTop=139
+		nWidth=1249
+		nHeight=642
+	}
+}
+nForceFileCount=0
+sActiveWindow="main.prg"
+CmdWindow {
+	bOpened=False
+	Window {
+		nLeft=351
+		nTop=94
+		nWidth=713
+		nHeight=410
+	}
+	nWinState=0
+}
+RunWindow {
+	bOpened=False
+	Window {
+		nLeft=150
+		nTop=81
+		nWidth=941
+		nHeight=383
+	}
+	nWinState=1
+	nNumOfDisplays=1
+	nSplitterDistance=354
+	Display1 {
+		nCamera=0
+		sSequences="1"
+	}
+	Display2 {
+		nCamera=0
+		sSequences="1"
+	}
+	Display3 {
+		nCamera=0
+		sSequences="1"
+	}
+	Display4 {
+		nCamera=0
+		sSequences="1"
+	}
+	Display5 {
+		nCamera=0
+		sSequences="1"
+	}
+	Display6 {
+		nCamera=0
+		sSequences="1"
+	}
+}
+IOLabelEditor {
+	bOpened=False
+	Window {
+		nLeft=575
+		nTop=36
+		nWidth=833
+		nHeight=486
+	}
+	nWinState=0
+}
+IOMonitor {
+	bOpened=False
+	Window {
+		nLeft=447
+		nTop=151
+		nWidth=500
+		nHeight=430
+	}
+}
+Simulator {
+	bOpened=False
+	Window {
+		nLeft=366
+		nTop=277
+		nWidth=1312
+		nHeight=480
+	}
+}
+TaskMgr {
+	bOpened=False
+	Window {
+		nLeft=1383
+		nTop=756
+		nWidth=478
+		nHeight=259
+	}
+}
+Macros {
+	bOpened=False
+	Window {
+		nLeft=716
+		nTop=302
+		nWidth=488
+		nHeight=429
+	}
+}
+RobotMgr {
+	bOpened=False
+	Window {
+		nLeft=-119
+		nTop=67
+		nWidth=702
+		nHeight=478
+	}
+}
+UserErrorEditor {
+	bOpened=False
+	Window {
+		nLeft=14
+		nTop=37
+		nWidth=1311
+		nHeight=494
+	}
+	nWinState=0
+}
+VisionGuide {
+	bOpened=False
+	Window {
+		nLeft=18
+		nTop=21
+		nWidth=1293
+		nHeight=725
+	}
+	nWinState=0
+	bShowFlowChart=True
+	nSplitterDistance1=1002
+	nSplitterDistance2=604
+	nSplitterDistance3=445
+	nSplitterDistance4=413
+	nSplitterDistance5=598
+}
+ForceGuide {
+	bOpened=False
+	Window {
+		nLeft=0
+		nTop=0
+		nWidth=0
+		nHeight=0
+	}
+	nWinState=0
+	bShowFlowChart=True
+	nSplitterDistance1=0
+	nSplitterDistance2=0
+	nSplitterDistance3=0
+	nSplitterDistance4=0
+	nSplitterDistance5=0
+	nSelectedTab=0
+}
+GUIBuilder {
+	bOpened=False
+	Window {
+		nLeft=0
+		nTop=0
+		nWidth=0
+		nHeight=0
+	}
+	nWinState=0
+	nSplitterDistance1=607
+	nSplitterDistance2=312
+	nSplitterDistance3=134
+	nSplitterDistance4=441
+}
+ProjectExplorer {
+	bProgramsOpened=True
+	bIncludesOpened=True
+	bLabelsOpened=True
+	bMacrosOpened=False
+	bFunctionsOpened=True
+	bVisionOpened=False
+	bVisionSequencesOpened=True
+	bVisionCalibsOpened=False
+	bGUIBOpened=True
+	bGUIBFormsOpened=False
+	bRobotPointsOpened=True
+	bCommonPointsOpened=True
+	bForcesOpened=True
+	bCommonForcesOpened=False
+	bRobotsOpened1=True
+	bForceGuideOpened=True
+	bForceSequencesOpened=False
+}

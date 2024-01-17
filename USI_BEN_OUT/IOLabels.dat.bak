@@ -1,0 +1,69 @@
+ENVT0100,LM:2023/04/10 09:22:27:050,DS:0000001053,CS:29054,MA:C4-00-AD-DA-68-E7,EI:           
+sRCVersion="7.5.0"
+InputBitLabels {
+	nNumberOfLabels=6
+	Label1 {
+		nBit=8
+		sLabel="DI_Senosr_Pick"
+		sDescription=""
+	}
+	Label2 {
+		nBit=9
+		sLabel="DI_GP_Close"
+		sDescription=""
+	}
+	Label3 {
+		nBit=10
+		sLabel="DI_GP_Open"
+		sDescription=""
+	}
+	Label4 {
+		nBit=11
+		sLabel="DI_Senosr_Check"
+		sDescription=""
+	}
+	Label5 {
+		nBit=14
+		sLabel="NG1_Sensor_Have"
+		sDescription=""
+	}
+	Label6 {
+		nBit=15
+		sLabel="NG2_Sensor_Have"
+		sDescription=""
+	}
+}
+InputByteLabels {
+	nNumberOfLabels=0
+}
+InputWordLabels {
+	nNumberOfLabels=0
+}
+OutputBitLabels {
+	nNumberOfLabels=2
+	Label1 {
+		nBit=9
+		sLabel="GP_CLOSE"
+		sDescription=""
+	}
+	Label2 {
+		nBit=10
+		sLabel="GP_OPEN"
+		sDescription=""
+	}
+}
+OutputByteLabels {
+	nNumberOfLabels=0
+}
+OutputWordLabels {
+	nNumberOfLabels=0
+}
+MemoryBitLabels {
+	nNumberOfLabels=0
+}
+MemoryByteLabels {
+	nNumberOfLabels=0
+}
+MemoryWordLabels {
+	nNumberOfLabels=0
+}

@@ -1,0 +1,74 @@
+ENVT0100,LM:2023/06/09 02:17:53:685,DS:0000001120,CS:24427,MA:C4-00-AD-DA-68-E7,EI:           
+sRCVersion="7.5.0"
+InputBitLabels {
+	nNumberOfLabels=5
+	Label1 {
+		nBit=8
+		sLabel="DI_Senosr_Pick"
+		sDescription=""
+	}
+	Label2 {
+		nBit=9
+		sLabel="DI_GP_Close"
+		sDescription=""
+	}
+	Label3 {
+		nBit=10
+		sLabel="DI_GP_Open"
+		sDescription=""
+	}
+	Label4 {
+		nBit=11
+		sLabel="DI_Senosr_Check"
+		sDescription=""
+	}
+	Label5 {
+		nBit=12
+		sLabel="DI_Table_Have"
+		sDescription=""
+	}
+}
+InputByteLabels {
+	nNumberOfLabels=0
+}
+InputWordLabels {
+	nNumberOfLabels=0
+}
+OutputBitLabels {
+	nNumberOfLabels=2
+	Label1 {
+		nBit=9
+		sLabel="GP_CLOSE"
+		sDescription=""
+	}
+	Label2 {
+		nBit=10
+		sLabel="GP_OPEN"
+		sDescription=""
+	}
+}
+OutputByteLabels {
+	nNumberOfLabels=0
+}
+OutputWordLabels {
+	nNumberOfLabels=0
+}
+MemoryBitLabels {
+	nNumberOfLabels=2
+	Label1 {
+		nBit=0
+		sLabel="GaugeResult_OK"
+		sDescription=""
+	}
+	Label2 {
+		nBit=1
+		sLabel="GaugeResult_NG"
+		sDescription=""
+	}
+}
+MemoryByteLabels {
+	nNumberOfLabels=0
+}
+MemoryWordLabels {
+	nNumberOfLabels=0
+}

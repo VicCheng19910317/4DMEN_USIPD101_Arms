@@ -1,0 +1,285 @@
+Global Integer i, j, product, x, y, SP_SDef, SP_NDef, Total_XY
+Global String cmd$, Return_code$
+Global Boolean IsBuzy, Ccd_Pass, Grip_Pass, product_load, test_mode
+Global Real ccdX, ccdY, ccdU, Thick_Conveyor, Thick_Platform '輸送帶到工件的厚度,平台到工件的厚度
+Function main_Out
+	'Robot 3
+	Reset
+	Motor On
+	Wait Motor = On
+	Power High
+	'----
+	Weight 3 '治具+工件重量
+	SP_NDef = 50
+	Speed SP_NDef
+	Accel SP_NDef, SP_NDef
+	SP_SDef = 500
+	SpeedS SP_SDef
+	AccelS 50, 50
+	'----
+	Ccd_Pass = True '相機檢測PASS
+	Grip_Pass = True '夾爪相關PASS
+	test_mode = True
+	Xqt Move_Test_Out
+	'---
+	IsBuzy = False
+	Xqt tcpipcmd_Out
+Fend
+Function Move_Test_Out
+	Integer re0
+	re0 = 0
+	Call AssemblPallet_Teach(ByRef re0)
+	Call GoHome_In
+	Do
+		Call MovetoPick_Ass
+		Call MoveToPut_Ass
+	Loop
+Fend
+Function MovetoPallet_Teach_Out(ByRef product_local As Integer)
+	'Robot 3
+	IsBuzy = True
+	product_load = False
+	j = 1
+	Select product_local
+		Case 0
+			product = product_local
+			x = 3
+			y = 4
+			Pallet 0, PL1, PL2, PL3, PL4, x, y
+			Thick_Conveyor = 0 '輸送帶到工件的厚度
+			Thick_Platform = 10 '平台到工件的厚度
+			product_load = True
+	Send
+	If test_mode = True Then
+		Thick_Conveyor = 50 '輸送帶到工件的厚度
+		Thick_Platform = 50 '平台到工件的厚度
+	EndIf
+	If product_load = True Then
+		Return_code$ = "RunFinish,PROD," + Str$(product)
+		Total_XY = x * y
+	Else
+		Return_code$ = "ERR,PROD"
+		Total_XY = 0
+	EndIf
+Fend
+Function Grip_Open_Out As Boolean
+	On GP_OPEN
+	Off GP_CLOSE
+	Wait Sw(DI_GP_Open) = On, 2
+	If TW = True And Grip_Pass = False Then
+		Return_code$ = "ERR,GRIP_OP" '回傳開爪失敗		
+		Grip_Open_Out = False
+		Exit Function
+	EndIf
+	Grip_Open_Out = True
+Fend
+Function Grip_Close_Out As Boolean
+	Off GP_OPEN
+	On GP_CLOSE
+	Wait Sw(DI_GP_Close) = On, 2
+	If TW = True And Grip_Pass = False Then
+		Return_code$ = "ERR,GRIP_OP" '回傳閉爪失敗		
+		Grip_Close_Out = False
+		Exit Function
+	EndIf
+	Grip_Close_Out = True
+Fend
+Function MovetoFirstCheck
+	'Robot 3
+	Jump3 Here :Z(500), check_one +Z(50 + Thick_Conveyor), check_one +Z(Thick_Conveyor) C3
+	Return_code$ = "RunFinish,CONE,"
+Fend
+Function MovetoSecondCheck
+	'Robot 3
+	Move check_two
+	Return_code$ = "RunFinish,CTWO,"
+Fend
+Function MovetoPick_Out '取料
+	'Robot 3
+	IsBuzy = True
+	If (Grip_Open_Out = False) Then
+		Exit Function
+	EndIf
+	Jump3 Here :Z(550), pick +Z(50 + Thick_Conveyor), pick +Z(10 + Thick_Conveyor) C3 CP
+	SpeedS 40
+    Move pick +Z(Thick_Conveyor)
+	SpeedS SP_SDef
+	Wait Sw(DI_Senosr_Pick) = On, 2
+	If TW = True And Grip_Pass = False Then
+		Move Here :Z(550)
+		Return_code$ = "ERR,SENSOR" '回傳偵測失敗
+		Exit Function
+	EndIf
+	If (Grip_Close_Out = True) Then
+		Print "取料完成"
+		Return_code$ = "RunFinish,PICK"
+	EndIf
+	Move Here +Z(50 + Thick_Conveyor) CP
+	Move pickup
+Fend
+Function MoveToSpecifyPUT_Out(ByRef Specify_num As Integer) '放料
+	'Robot 3
+	String ex_product$, ex_j$
+	j = Specify_num
+	IsBuzy = True
+	Jump3 Here :Z(550), Pallet(product, j) +Z(30 + Thick_Platform), Pallet(product, j) +Z(Thick_Platform) C3
+	ex_product$ = Str$(product)
+	ex_j$ = Str$(j)
+	j = j + 1 '瑪垛+1
+	If j > y * x Then '瑪垛回到1
+		j = 1
+	EndIf
+	If (Grip_Open_Out = True) Then
+		Print "放料完成"
+		Return_code$ = "RunFinish,PUTP" + ex_product$ + "," + ex_j$
+	EndIf
+	Move Here +Z(30 + Thick_Platform) CP
+	Move Here :Z(550)
+Fend
+Function MoveToPut_Out '放料
+	'Robot 3
+	String ex_product$, ex_j$
+	IsBuzy = True
+	Jump3 Here :Z(550), Pallet(product, j) +Z(30 + Thick_Platform), Pallet(product, j) +Z(Thick_Platform) C3
+	ex_product$ = Str$(product)
+	ex_j$ = Str$(j)
+	j = j + 1 '瑪垛+1
+	If j > y * x Then '瑪垛回到1
+		j = 1
+	EndIf
+	If (Grip_Open_Out = True) Then
+		Print "放料完成"
+		Return_code$ = "RunFinish,PUTP" + ex_product$ + "," + ex_j$
+	EndIf
+	Move Here +Z(30 + Thick_Platform) CP
+	Move Here :Z(550)
+Fend
+Function MoveToRemake 'NG
+	Jump3 Here :Z(600), remakeP :Z(600), remakeP C3
+	If (Grip_Open_Out = False) Then
+		Exit Function
+	EndIf
+	Return_code$ = "RunFinish,GONG"
+Fend
+Function GoHome_Out '復歸
+	'Robot 3
+	Speed 10
+	SpeedS 40
+	IsBuzy = True
+	Print CZ(Here)
+	If CZ(Here) < 500 Then
+		Move Here +Z(50)
+		Go Here :Z(550)
+	ElseIf CZ(Here) < 550 Then
+		Move Here :Z(550)
+	EndIf
+	Home
+	Return_code$ = "RunFinish,HOME"
+	SpeedS SP_SDef
+	Speed SP_NDef
+	Print Return_code$
+Fend
+Function tcpipcmd_Out
+	String leftcmd$, midcmd$
+	Boolean Pass_Tcpip
+	Pass_Tcpip = True
+	SetNet #203, "192.168.0.23", 2000, CRLF, NONE, 0, TCP
+	Do
+		 OpenNet #203 As Server
+		 WaitNet #203, 60
+		 If TW = True Then
+		 	Print "Time Out"
+		 Else
+		 	Print " #203 Connected"
+		 	Do
+			 	If (ChkNet(203) > 0 And IsBuzy = False) Or Pass_Tcpip = True Then '連線埠有資料
+			 		If Pass_Tcpip = False Then
+			 			Line Input #203, cmd$
+			 		EndIf
+				 	If cmd$ <> "" Then
+			 			Print "received '", cmd$, "' from PC"
+			 			leftcmd$ = Left$(cmd$, 4) '讀1-4
+			 			Select leftcmd$
+			 				Case "PROD" '讀產品
+			 					Integer product_tcpip
+			 					Print #203, "cmd,received"
+			 					midcmd$ = Mid$(cmd$, 5) '第五個字往後讀
+			 					product_tcpip = Val(midcmd$)
+                                Call MovetoPallet_Teach_Out(ByRef product_tcpip)
+			 				Case "PICK" '取料及相機
+			 					Print #203, "cmd,received"
+			 					If product_load = True Then
+			 						Call MovetoPick_Out
+			 					Else
+			 						Return_code$ = "ERR,Product No Load"
+			 					EndIf
+			 				Case "PUTP" '放料
+			 					Print #203, "cmd,received"
+			 					If product_load = True Then
+			 						Call MoveToPut_Out
+			 					Else
+			 						Return_code$ = "ERR,Product No Load"
+			 					EndIf
+			 				Case "SYPU" '指定取料
+			 					Integer Specify_num
+			 					Print #204, "cmd,received"
+			 					Specify_num = Val(Mid$(cmd$, 5))
+			 					If product_load = True And (Specify_num <= Total_XY) Then
+			 						Call MoveToSpecifyPUT_Out(ByRef Specify_num)
+			 					Else
+			 						If product_load = False Then
+			 							Return_code$ = "ERR,Product No Load"
+			 						Else
+			 							Return_code$ = "ERR,Specify_num is too more"
+			 						EndIf
+			 					EndIf
+			 				Case "HOME" '復歸
+			 					Print #203, "cmd,received"
+			 					Call GoHome_Out
+			 				Case "CONE" '第一次檢查
+			 					Print #203, "cmd,received"
+			 					If product_load = True Then
+			 						Call MovetoFirstCheck
+			 					Else
+			 						Return_code$ = "ERR,Product No Load"
+			 					EndIf
+			 				Case "CTWO" '第二次檢查
+			 					Print #203, "cmd,received"
+			 					If product_load = True Then
+			 						Call MovetoSecondCheck
+			 					Else
+			 						Return_code$ = "ERR,Product No Load"
+			 					EndIf
+			 				Case "GONG" '廢料區
+			 					Print #203, "cmd,received"
+			 					If product_load = True Then
+			 						Call MoveToRemake
+			 					Else
+			 						Return_code$ = "ERR,Product No Load"
+			 					EndIf
+			 				Default
+			 					Print #203, "ERR,Cmd_NotFound"
+			 			Send
+			 			IsBuzy = False
+			 			If Return_code$ <> "" Then
+			 				Print #203, Return_code$
+			 				Print Return_code$
+			 				Return_code$ = ""
+			 			EndIf
+				 	cmd$ = ""
+                    EndIf
+			 	EndIf
+			 	If ChkNet(203) = -3 Then
+			 		CloseNet #203
+			 		Print "Disconnected"
+			 		Exit Do
+			 	EndIf
+			 Loop
+		 EndIf
+	Loop
+Fend
+'流程 
+'開始讀參數 PROD0
+'動作 PUTP PICK
+'復歸 Home
+

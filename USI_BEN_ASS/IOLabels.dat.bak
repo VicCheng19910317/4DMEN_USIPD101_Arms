@@ -1,0 +1,74 @@
+ENVT0100,LM:2023/02/13 09:45:55:844,DS:0000001128,CS:09259,MA:C4-00-AD-DA-68-E7,EI:           
+sRCVersion="7.5.0"
+InputBitLabels {
+	nNumberOfLabels=5
+	Label1 {
+		nBit=8
+		sLabel="DI_Senosr_Pick"
+		sDescription=""
+	}
+	Label2 {
+		nBit=11
+		sLabel="DI_Senosr_Check"
+		sDescription=""
+	}
+	Label3 {
+		nBit=12
+		sLabel="DI_Vacuum"
+		sDescription=""
+	}
+	Label4 {
+		nBit=14
+		sLabel="DI_Pneumatic_OP"
+		sDescription=""
+	}
+	Label5 {
+		nBit=15
+		sLabel="DI_Pneumatic_CL"
+		sDescription=""
+	}
+}
+InputByteLabels {
+	nNumberOfLabels=0
+}
+InputWordLabels {
+	nNumberOfLabels=0
+}
+OutputBitLabels {
+	nNumberOfLabels=4
+	Label1 {
+		nBit=11
+		sLabel="Vacuum_CL"
+		sDescription=""
+	}
+	Label2 {
+		nBit=12
+		sLabel="Vacuum_OP"
+		sDescription=""
+	}
+	Label3 {
+		nBit=13
+		sLabel="Pneumatic_OP"
+		sDescription=""
+	}
+	Label4 {
+		nBit=14
+		sLabel="Pneumatic_CL"
+		sDescription=""
+	}
+}
+OutputByteLabels {
+	nNumberOfLabels=0
+}
+OutputWordLabels {
+	nNumberOfLabels=0
+}
+MemoryBitLabels {
+	nNumberOfLabels=0
+}
+MemoryByteLabels {
+	nNumberOfLabels=0
+}
+MemoryWordLabels {
+	nNumberOfLabels=0
+}

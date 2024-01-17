@@ -1,0 +1,27 @@
+ENVT0100,LM:2023/02/21 09:45:57:613,DS:0000000574,CS:16652,MA:C4-00-AD-DA-68-E7,EI:           
+sRCVersion="7.5.0"
+sGUID="36470841-a1fd-4adc-9a31-d6c50c155368"
+nCameraNumber=1
+nCameraCount=2
+Camera1 {
+	nCameraNumber=1
+	nSysCamNum=1
+	bIsVirtual=False
+	sName="USI_BEN_IN"
+	sModel="acA1600-60gm"
+	sIPAddress="192.168.0.76"
+	sIPMask=""
+	sType="NetworkCamera"
+	nChannel=3
+}
+Camera2 {
+	nCameraNumber=2
+	nSysCamNum=2
+	bIsVirtual=False
+	sName="USI_BEN_ASS"
+	sModel="acA1600-60gm"
+	sIPAddress="192.168.0.76"
+	sIPMask=""
+	sType="NetworkCamera"
+	nChannel=4
+}

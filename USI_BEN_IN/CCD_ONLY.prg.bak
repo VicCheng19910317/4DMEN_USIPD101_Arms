@@ -1,0 +1,18 @@
+Function CCDONLY
+	Real CXX, CYY, CUU
+	Boolean found
+	VRun Test01 '執行相機拍照
+ 	VGet Test01.Point01.RobotXYU, found, CXX, CYY, CUU
+	If (found = True) Or Ccd_Pass = True Then  '有找到物件And CXX <> 0 And CYY <> 0 And CUU <> 0
+		Print "原始U", Str$(CUU)
+		If CUU > 180 Then
+			CUU = CUU - 360
+		EndIf
+		TLSet 1, XY(CXX, CYY, 00, CUU)
+		Tool 1
+ 		Print "The Geom X is: ", CXX, "Y is:", CYY, "U is:", CUU
+	Else
+
+	EndIf
+Fend
+

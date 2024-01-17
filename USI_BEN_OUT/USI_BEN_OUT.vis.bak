@@ -1,0 +1,65 @@
+ENVT0100,LM:2023/02/16 00:34:48:691,DS:0000001289,CS:16933,MA:C4-00-AD-DA-68-E7,EI:           
+sRCVersion="7.5.0"
+sGUID="36470841-a1fd-4adc-9a31-d6c50c155368"
+nCameraNumber=1
+nCalibCount=1
+Calib1 {
+	sApproachPoint=""
+	bAutoCamPoints=True
+	bAutoReference=True
+	nAutoRefMode=1
+	rAutoRefInitRotation=5
+	rAutoRefTolerance=1
+	nCamera=1
+	nCameraOrientation=4
+	bDistCorrectEnabled=False
+	nDistCorrectTargetSeq=0
+	nDistCorrectType=5
+	nLamp=-1
+	nLampDelay=0
+	nLJMMode=0
+	rMaxMoveDist=200
+	nMotionDelay=500
+	sName="ttcheck"
+	nReferenceType=1
+	nRobotAccel=10
+	rRobotLimZ=0
+	nRobotLocal=0
+	nRobotNumber=1
+	nRobotSpeed=10
+	rRobotUOffset=0
+	bShowConfirmation=True
+	nTargetSequence=0
+	bTwoRefPoints=False
+	nUpwardLamp=-1
+	nUpwardSequence=0
+	bCalComplete=False
+	bPointsTaught=False
+	nCalVideoWidth=0
+	nCalVideoHeight=0
+	bReverseCameraZ=False
+	bUseRobotUOffset2=True
+}
+nCameraCount=2
+Camera1 {
+	nCameraNumber=1
+	nSysCamNum=1
+	bIsVirtual=False
+	sName="USI_BEN_IN"
+	sModel="acA1600-60gm"
+	sIPAddress="192.168.0.76"
+	sIPMask=""
+	sType="NetworkCamera"
+	nChannel=3
+}
+Camera2 {
+	nCameraNumber=2
+	nSysCamNum=2
+	bIsVirtual=False
+	sName="USI_BEN_ASS"
+	sModel="acA1600-60gm"
+	sIPAddress="192.168.0.76"
+	sIPMask=""
+	sType="NetworkCamera"
+	nChannel=4
+}
