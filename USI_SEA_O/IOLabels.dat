@@ -1,0 +1,74 @@
+ENVT0100,LM:2023/03/20 09:34:10:824,DS:0000001108,CS:00036,MA:C4-00-AD-DA-74-63,EI:           
+sRCVersion="7.4.8"
+InputBitLabels {
+	nNumberOfLabels=5
+	Label1 {
+		nBit=8
+		sLabel="DI_Senosr_Pick"
+		sDescription=""
+	}
+	Label2 {
+		nBit=9
+		sLabel="DI_GP_Close"
+		sDescription=""
+	}
+	Label3 {
+		nBit=10
+		sLabel="DI_GP_Open"
+		sDescription=""
+	}
+	Label4 {
+		nBit=11
+		sLabel="DI_Senosr_Check"
+		sDescription=""
+	}
+	Label5 {
+		nBit=16
+		sLabel="DI_Vacuum"
+		sDescription=""
+	}
+}
+InputByteLabels {
+	nNumberOfLabels=0
+}
+InputWordLabels {
+	nNumberOfLabels=0
+}
+OutputBitLabels {
+	nNumberOfLabels=4
+	Label1 {
+		nBit=9
+		sLabel="GP_CLOSE"
+		sDescription=""
+	}
+	Label2 {
+		nBit=10
+		sLabel="GP_OPEN"
+		sDescription=""
+	}
+	Label3 {
+		nBit=11
+		sLabel="Vacuum_CL"
+		sDescription=""
+	}
+	Label4 {
+		nBit=12
+		sLabel="Vacuum_OP"
+		sDescription=""
+	}
+}
+OutputByteLabels {
+	nNumberOfLabels=0
+}
+OutputWordLabels {
+	nNumberOfLabels=0
+}
+MemoryBitLabels {
+	nNumberOfLabels=0
+}
+MemoryByteLabels {
+	nNumberOfLabels=0
+}
+MemoryWordLabels {
+	nNumberOfLabels=0
+}

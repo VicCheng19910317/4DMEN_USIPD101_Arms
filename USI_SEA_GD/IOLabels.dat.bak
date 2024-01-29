@@ -1,0 +1,99 @@
+ENVT0100,LM:2023/03/09 05:15:41:850,DS:0000001430,CS:05120,MA:C4-00-AD-DA-74-63,EI:           
+sRCVersion="7.4.8"
+InputBitLabels {
+	nNumberOfLabels=5
+	Label1 {
+		nBit=12
+		sLabel="DI_Spti"
+		sDescription=""
+	}
+	Label2 {
+		nBit=13
+		sLabel="DI_Glued_OP"
+		sDescription=""
+	}
+	Label3 {
+		nBit=16
+		sLabel="TCPX"
+		sDescription=""
+	}
+	Label4 {
+		nBit=17
+		sLabel="TCPY"
+		sDescription=""
+	}
+	Label5 {
+		nBit=18
+		sLabel="Glued_have"
+		sDescription=""
+	}
+}
+InputByteLabels {
+	nNumberOfLabels=0
+}
+InputWordLabels {
+	nNumberOfLabels=0
+}
+OutputBitLabels {
+	nNumberOfLabels=3
+	Label1 {
+		nBit=11
+		sLabel="DO_Spit_CL"
+		sDescription=""
+	}
+	Label2 {
+		nBit=12
+		sLabel="DO_Spit_OP"
+		sDescription=""
+	}
+	Label3 {
+		nBit=15
+		sLabel="Glued"
+		sDescription=""
+	}
+}
+OutputByteLabels {
+	nNumberOfLabels=0
+}
+OutputWordLabels {
+	nNumberOfLabels=0
+}
+MemoryBitLabels {
+	nNumberOfLabels=6
+	Label1 {
+		nBit=0
+		sLabel="RUN1_TCPX_1"
+		sDescription=""
+	}
+	Label2 {
+		nBit=1
+		sLabel="RUN1_TCPY_1"
+		sDescription=""
+	}
+	Label3 {
+		nBit=2
+		sLabel="RUN1_TCPX_2"
+		sDescription=""
+	}
+	Label4 {
+		nBit=3
+		sLabel="RUN1_TCPY_2"
+		sDescription=""
+	}
+	Label5 {
+		nBit=4
+		sLabel="RUN1_TCPZ_1"
+		sDescription=""
+	}
+	Label6 {
+		nBit=5
+		sLabel="RUN1_TCPZ_2"
+		sDescription=""
+	}
+}
+MemoryByteLabels {
+	nNumberOfLabels=0
+}
+MemoryWordLabels {
+	nNumberOfLabels=0
+}

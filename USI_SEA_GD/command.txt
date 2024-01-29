@@ -1,0 +1,9 @@
+>vsaveimage CCD_PL,"C:\Users\MyUser\Pictures\052.bmp",True
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 

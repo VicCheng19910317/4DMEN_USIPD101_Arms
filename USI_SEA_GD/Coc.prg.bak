@@ -1,0 +1,6 @@
+Function Coc
+	VRun CCD_PL
+	VGet CCD_PL.LineFind02.RobotU, uu
+	Print "U:", uu
+Fend
+

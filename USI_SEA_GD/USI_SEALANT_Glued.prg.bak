@@ -1,0 +1,1187 @@
+Global Integer i, j, x, y, SP_SDef, SP_Def, start_pt, end_pt, Speed_CR, Speed_LN, Start_move, Now_product
+Global String cmd$, Return_code$, cmd_plu$, str_seq$
+Global Boolean IsBuzy, Ccd_Pass, Glued_Pass, product_load, Pass_Tcpip, test_mode, Pass_Have
+Global Real ccdX, ccdY, ccdU, Thick_Conveyor, Thick_Platform, Standard_ccd_U, Standard_ccd_X, Standard_ccd_Y
+Global Double MiD_XX, MiD_YY, Out_side_X, Out_side_Y, Glued_mid_X, Glued_mid_Y
+Global Preserve Real Glue_Time
+Function main
+	'V1.3SG
+	Reset
+	'-------	
+	Motor On
+'	ThreeT = 0; agv_result = False
+	Wait Motor = On
+	Power High
+'	Speed 3; 	Accel 3, 3
+'	SpeedS 50; 	AccelS 300, 300
+	OnErr GoTo handle
+'====Tool Setting===============================================================
+	'設置Tool的重量和慣性參數
+	'Inertia [負載慣性]kgm^2, [離心率]mm
+	LoadPoints "robot1.pts"
+	Tool 0
+	Weight 2.5
+	Inertia 0.05, 40
+	SetNet #205, "192.168.0.25", 2000, CRLF, NONE, 0, TCP
+'	SetNet #211, "192.168.0.25", 2001, CRLF, NONE, 0, TCP
+	IsBuzy = False
+	product_load = False
+	'--------基本設定
+	Call DefSpeed
+	'----------測試功能
+'	Ccd_Pass = True '相機檢測PASS
+	Glued_Pass = True '塗膠相關PASS
+	'Pass_Tcpip = True
+	Pass_Have = True '剩餘膠高檢測PASS
+	If Glue_Time < 1 Then
+		Glue_Time = 1
+	EndIf
+	Integer re0
+	re0 = 0
+	Call Product_Setting(re0)
+	Return_code$ = ""
+	'----------
+	Off DO_Spit_OP
+	On DO_Spit_CL
+	Off Glued
+'	Xqt Pause_RESET, NoPause
+'	Xqt Altitude_Detection
+	Xqt 2, tcpipcmd_Gld, NoPause
+	Exit Function
+	handle:
+		Print "Error occer"
+		Print "ERR:", SysErr
+		Return_code$ = "ERR;" + Str$(SysErr)
+			If ChkNet(205) > 0 Then
+				Print 205, "ERR;", SysErr
+			EndIf
+		If ChkNet(211) > 0 Then
+			Print #211, "ERR;", SysErr
+		EndIf
+	Reset
+	Power High
+	Call DefSpeed
+Fend
+Function Altitude_Detection
+	If Sw(Glued_have) = Off Then
+		Print #205, "WARRING;Insufficient Glued"
+	EndIf
+Fend
+Function Pause_RESET
+	Do
+        If (PauseOn = True Or SafetyOn = True) Then 'And ChkNet(201) <> -2 
+     		Print "暫停", ChkNet(205), PauseOn, SafetyOn
+		 	If TW = True Then
+		 		Print "Time Out"
+		 	Else
+		 		Do
+
+			 		If ChkNet(205) > 0 Then '連線埠有資料 Or Pass_Tcpip = True	
+				 		Line Input #205, cmd_plu$
+				 		Wait 1
+				 		If Len(cmd_plu$) > 0 And Trim$(cmd_plu$) <> "" Then
+				 				String toks1$(0)
+			 					ParseStr cmd_plu$, toks1$(), ";"
+			 					Select toks1$(0)
+						 		Case "Resume"
+							 		Print #205, "Resume"
+							 		Print "ERROR Continue"
+									Cont
+									cmd_plu$ = ""
+									Exit Do
+						 		Default
+				 					Print #205, "ERR,Cmd_NotFound"
+				 					cmd_plu$ = ""
+				 			Send
+				 		EndIf
+			 		EndIf
+		 		Loop While (PauseOn = True Or SafetyOn = True)
+		 	EndIf
+		EndIf
+	Loop
+Fend
+Function Product_Setting(product_local As Integer)
+	product_load = False
+	IsBuzy = True
+	Integer I_pd, pp
+	Thick_Conveyor = 0 '輸送帶到工件的高度
+	Thick_Platform = 0 '平台到工件的高度
+	I_pd = 0
+	Select product_local '讀取產品編號
+		Case 0
+			str_seq$ = "CCD_PL" '相機檢測序列
+			Standard_ccd_X = -230.261 'X標準值
+			Standard_ccd_Y = 274.479 'Y標準值
+			Standard_ccd_U = 258.48 'U標準值
+			Out_side_Y = 1 'Y方向外擴距離
+			Out_side_X = 0.3 'X方向外擴距離
+			start_pt = 100; end_pt = 123;  Start_move = 200; Speed_CR = 2000; Speed_LN = 40
+			'start_pt:產品起始點位;end_pt:產品路徑終點;Speed_CR:轉彎速度;Speed_LN:直線速度
+			'直線與弧線最大速度2000
+			
+			product_load = True
+		Case 1
+			str_seq$ = "CCD_PL" '相機檢測序列
+			Standard_ccd_X = -230.261 'X標準值
+			Standard_ccd_Y = 274.479 'Y標準值
+			Standard_ccd_U = 258.48 'U標準值
+			Out_side_Y = 1 'Y方向外擴距離
+			Out_side_X = 0.3 'X方向外擴距離
+			start_pt = 100; end_pt = 123;  Start_move = 200; Speed_CR = 2000; Speed_LN = 40
+			'start_pt:產品起始點位;end_pt:產品路徑終點(不包括三條線及上方中點);Speed_CR:轉彎速度;Speed_LN:直線速度
+			'直線與弧線最大速度2000
+			
+			product_load = True
+		Case 2
+			str_seq$ = "CCD_PL"
+			Standard_ccd_U = 155.5
+			Standard_ccd_X = -231.8
+			Standard_ccd_Y = 274.4
+			Out_side_Y = 1
+			Out_side_X = 0.3
+			start_pt = 130; end_pt = 153;  Start_move = 200; Speed_CR = 2000; Speed_LN = 40
+
+			product_load = True
+	Send
+	
+
+	
+	If product_load = True Then
+		Now_product = product_local
+			Glued_mid_X = (CX(P(start_pt)) + CX(P(start_pt + 10))) / 2
+			Glued_mid_Y = (CY(P(start_pt)) + CY(P(start_pt + 10))) / 2
+			For pp = start_pt To end_pt
+				P(Start_move + I_pd) = XY(CX(P(pp)) - CX(P(start_pt)) - Glued_mid_X, CY(P(pp)) - CY(P(start_pt)) - Glued_mid_Y, CZ(P(300 + Now_product)), 0) /7
+				I_pd = I_pd + 1
+			Next
+
+		Return_code$ = "RunFinish,PROD," + Str$(product_local)
+	Else
+		Return_code$ = "ERR,PROD"
+		
+	EndIf
+	IsBuzy = False
+	Print Return_code$
+Fend
+Function Set_XYZU(Offset_X As Real, Offset_Y As Real, Offset_Z As Real, Offset_U As Real)
+	If Now_product >= 0 Then
+		P(600 + Now_product) = XY(Offset_X, Offset_Y, Offset_Z, Offset_U) '補正儲存在(600+產品編號)上
+		SavePoints "robot1.pts"
+		Return_code$ = "SETSHIFT;" + Str$(CX(P(600 + Now_product))) + ";" + Str$(CY(P(600 + Now_product))) + ";" + Str$(CZ(P(600 + Now_product))) + ";" + Str$(CU(P(600 + Now_product)))
+	EndIf
+Fend
+Function Get_XYZU
+	Return_code$ = "GETSHIFT;" + Str$(CX(P(600 + Now_product))) + ";" + Str$(CY(P(600 + Now_product))) + ";" + Str$(CZ(P(600 + Now_product))) + ";" + Str$(CU(P(600 + Now_product)))
+Fend
+Function MovetoSpit_Gld '吐膠
+	OnErr GoTo handle
+	Tool 1
+	If Pass_Have <> True Then
+		Call Altitude_Detection
+	EndIf
+	Jump Sptipoint
+	Off DO_Spit_CL
+	On DO_Spit_OP
+
+	If Glued_Case = False Then
+		Off DO_Spit_CL
+		Off DO_Spit_OP
+		Exit Function
+	EndIf
+	Wait 1
+	If GluedClose_Case = False Then
+		Off DO_Spit_OP
+		On DO_Spit_CL
+		Exit Function
+	EndIf
+	Wait Glue_Time
+	On DO_Spit_CL
+	Off DO_Spit_OP
+	Tool 0
+	Jump Here :Z(-1)
+	Return_code$ = "RunFinish,SPIT,"
+	Print Return_code$
+	Exit Function
+		handle:
+			Off DO_Spit_OP
+			On DO_Spit_CL
+			Off Glued
+			Print "Error occer"
+			Print "ERR:", SysErr, ",GLUE"
+			If ChkNet(211) > 0 Then
+				Print #211, "ERR:", SysErr
+			EndIf
+		Reset
+		Power High
+		Call DefSpeed
+Fend
+Function Glued_Case As Boolean
+		Glued_Case = True
+		On Glued
+		Wait Sw(DI_Glued_OP) = On, 3
+		If TW = True And Glued_Pass = False Then
+			Off Glued
+			Glued_Case = False
+			Move Here :Z(0)
+			Return_code$ = "ERR,GLUED_Open" '回傳塗膠失敗		
+			Exit Function
+		EndIf
+		Wait 0.05
+Fend
+Function GluedClose_Case As Boolean
+		GluedClose_Case = True
+		Off Glued
+		Wait Sw(DI_Glued_OP) = Off, 2
+		If TW = True And Glued_Pass = False Then
+			Off Glued
+			GluedClose_Case = False
+			Move Here :Z(0)
+			Return_code$ = "ERR,GLUED_Close" '回傳塗膠失敗		
+			Exit Function
+		EndIf
+		'Wait 0.1
+Fend
+Function Move_OnTable
+	Integer Table_GapX, Table_GapY '行跟列
+	Integer Speed_Tb_LN, Speed_Tb_Move '直線塗膠速度跟非塗膠速度
+	Double Table_X, Table_Y '每個工件X跟Y的間隔
+	SpeedS 50 '最高速度
+	AccelS 500, 500 '加速度 減速度
+	Speed_Tb_LN = 20 'Speed_Tb_LN =塗膠速度
+	Table_X = 95.3; Table_Y = 80.4; Speed_Tb_Move = 50
+	For Table_GapY = 0 To 1 Step 1
+		For Table_GapX = 0 To 2 Step 1
+        Jump Table_first +X(Table_X * Table_GapX) +Y(Table_Y * Table_GapY)
+        SpeedS Speed_Tb_LN
+		Call Glued_Case
+		Move Table_first_fin +X(Table_X * Table_GapX) +Y(Table_Y * Table_GapY) -Y(2) ! D90; Off Glued !
+		Move Here +Z(10)
+		SpeedS Speed_Tb_Move
+		'Call GluedClose_Case
+		Jump Table_second +X(Table_X * Table_GapX) +Y(Table_Y * Table_GapY)
+		SpeedS Speed_Tb_LN
+		Call Glued_Case
+		Move Table_second_fin +X(Table_X * Table_GapX) +Y(Table_Y * Table_GapY) -Y(2) ! D90; Off Glued !
+		Move Here +Z(10)
+		SpeedS Speed_Tb_Move
+		'Call GluedClose_Case
+		Jump Table_thried +X(Table_X * Table_GapX) +Y(Table_Y * Table_GapY)
+		SpeedS Speed_Tb_LN
+		Call Glued_Case
+		Move Table_thried_fin +X(Table_X * Table_GapX) +Y(Table_Y * Table_GapY) -Y(2) ! D90; Off Glued !
+		Move Here +Z(10)
+		SpeedS Speed_Tb_Move
+		'Call GluedClose_Case
+		Next
+	Next
+	Jump CCD_PL
+	Call DefSpeed '80.4 95.3
+	Exit Function
+	handle:
+		Off Glued
+		Print "Error GLUE"
+		Print "ERR;", Err, ";GLUE"
+		Return_code$ = "ERR;" + Str$(Err)
+		If ChkNet(205) > 0 Then
+			Print 205, "ERR;", Err
+		EndIf
+
+	Reset
+	Power High
+	Call DefSpeed
+Fend
+Function Move_OnTable2
+	Integer Table_GapX, Table_GapY, T_x, T_y, T_z '行跟列
+	Integer Speed_Tb_LN, Speed_Tb_Move '直線塗膠速度跟非塗膠速度
+    Integer T_Strip '幾條線
+	Double Table_X, Table_Y '每個工件X跟Y的間隔
+	Double T_Spacing, T_Offset '每條線間距,往左多少開始
+	SpeedS 50 '最高速度
+	AccelS 500, 500 '加速度 減速度
+	Call DefSpeed
+	Speed_Tb_LN = 20; Speed_Tb_Move = 50
+    Table_X = 95.3; Table_Y = 80.4; T_Offset = 0.5; T_Spacing = 0.2
+    Table_GapY = 2; Table_GapX = 3; T_Strip = 1
+    If T_Strip <= 0 Then
+    	Print "ERR;", Err, ";GLUE"
+    	Exit Function
+    EndIf
+  	Tool 1
+	For T_x = 0 To (Table_GapX - 1) Step 1
+		For T_y = 0 To (Table_GapY - 1) Step 1
+        	For T_z = 0 To (T_Strip - 1)
+	            Jump Table_first +X(Table_X * T_x - T_Offset + T_z * T_Spacing) +Y(Table_Y * T_y)
+		        SpeedS Speed_Tb_LN
+				Call Glued_Case
+	            Move Table_first_fin +X(Table_X * T_x - T_Offset + T_z * T_Spacing) +Y(Table_Y * T_y) ! D90; Off Glued !
+				Move Here +Z(10)
+				SpeedS Speed_Tb_Move
+				'Call GluedClose_Case
+			Next
+			For T_z = 0 To (T_Strip - 1)
+	            Jump Table_second +X(Table_X * T_x - T_Offset + T_z * T_Spacing) +Y(Table_Y * T_y)
+				SpeedS Speed_Tb_LN
+				Call Glued_Case
+	            Move Table_second_fin +X(Table_X * T_x - T_Offset + T_z * T_Spacing) +Y(Table_Y * T_y) ! D90; Off Glued !
+				Move Here +Z(10)
+				SpeedS Speed_Tb_Move
+				'Call GluedClose_Case
+			Next
+			For T_z = 0 To (T_Strip - 1)
+	            Jump Table_thried +X(Table_X * T_x - T_Offset + T_z * T_Spacing) +Y(Table_Y * T_y)
+				SpeedS Speed_Tb_LN
+				Call Glued_Case
+	            Move Table_thried_fin +X(Table_X * T_x - T_Offset + T_z * T_Spacing) +Y(Table_Y * T_y) ! D90; Off Glued !
+				Move Here +Z(10)
+				SpeedS Speed_Tb_Move
+				'Call GluedClose_Case       
+			Next
+		Next
+	Next
+	Tool 0
+	Jump CCD_PL
+	Call DefSpeed '80.4 95.3
+	Exit Function
+	handle:
+		Off Glued
+		Print "Error GLUE"
+		Print "ERR;", Err, ";GLUE"
+		Return_code$ = "ERR;" + Str$(Err)
+		If ChkNet(205) > 0 Then
+			Print 205, "ERR;", Err
+		EndIf
+	Reset
+	Power High
+	Call DefSpeed
+Fend
+Function Move_OnTable3(PD_TB As Int32) 'X長度 Y長度'每個工件X跟Y的間隔
+	Integer Table_GapX, Table_GapY, T_x, T_y '行跟列
+	Integer Speed_Tb_LN, Speed_Tb_Move '直線塗膠速度跟非塗膠速度
+	Double X_Length, Y_Length	'1.2 X跟Y塗膠距離
+	Double Table_X, Table_Y '3.4 每個工件X跟Y的間隔
+	SpeedS 50 '最高速度
+	AccelS 500, 500 '加速度 減速度
+	Call DefSpeed
+	Speed_Tb_LN = 30; Speed_Tb_Move = 100
+	X_Length = 37; Y_Length = 29.9 'X跟Y塗膠距離
+	Table_X = 90; Table_Y = 51.8; '每個工件X跟Y的間隔
+    Table_GapY = 2; Table_GapX = 3; '行跟列
+    Table_free = P(280 + PD_TB)
+    Tool 1
+	For T_x = 0 To (Table_GapX - 1) Step 1
+		For T_y = 0 To (Table_GapY - 1) Step 1
+	            Jump Table_free +X(Table_X * T_x) +Y(Table_Y * T_y) +Z(1) '左下開始
+		        SpeedS Speed_Tb_LN
+		        Move Table_free +X(Table_X * T_x) +Y(Table_Y * T_y)
+		        CP On
+				Call Glued_Case
+				Wait 0.1
+	            Move Here +Y(Y_Length)
+				'Call Glued_Case
+	            Move Here +X(X_Length)
+	            'Call Glued_Case
+	            Move Here -Y(Y_Length)
+	            'Call Glued_Case
+	            Move Here -X(X_Length)
+				SpeedS Speed_Tb_Move
+				Call GluedClose_Case
+				CP Off
+				Move Here :Z(-1)
+		Next
+	Next
+	Tool 0
+	Jump CCD_PL
+	Call DefSpeed
+	Return_code$ = "RunFinish;MANUALGLUE"
+	Exit Function
+	handle:
+		Off Glued
+		Tool 0
+		Jump Here(-1)
+		Print "Error GLUE"
+		Print "ERR;", SysErr, ";GLUE"
+		Return_code$ = "ERR;" + Str$(SysErr)
+		If ChkNet(205) > 0 Then
+			Print 205, "ERR;", SysErr
+		EndIf
+	Reset
+	Power High
+	Call DefSpeed
+Fend
+Function Move_Test_Glued '塗膠
+	Tool 1
+	OnErr GoTo handle
+	Off Glued
+	If Pass_Have <> True Then '無檢測膠高PASS則確認膠高
+		Call Altitude_Detection
+	EndIf
+	'開始塗膠 		
+	Boolean found, found2, found3
+	Real xx, yy, uu
+	Call DefSpeed
+	Real Line_high; '畫三條線下降高度
+	'設定完成
+	Tool 0
+	Jump LJM(CCD_PL)
+	Wait 0.5
+	VRun str_seq$
+	VGet str_seq$.Point01.RobotXYU, found, xx, yy, uu
+	'wei
+	xx = xx + 1.543
+	yy = yy + 0.122
+	If found = True Then
+	
+		VGet str_seq$.LineFind02.Angle, uu
+		Print "U:", uu
+		uu = Standard_ccd_U - uu
+		If Abs(uu) > 1 And Abs(Abs(xx) - Abs(Standard_ccd_X)) > 5 And Abs(Abs(yy) - Abs(Standard_ccd_Y)) > 5 Then
+			Print "ERR;XYU>;", uu
+			VRun str_seq$
+			VGet str_seq$.Point01.RobotXYU, found, xx, yy, uu
+			'wei
+			xx = xx + 1.543
+			yy = yy + 0.122
+			If found = True Then
+				VGet str_seq$.LineFind02.Angle, uu
+				uu = uu - Standard_ccd_U
+				If Abs(uu) > 1 And Abs(Abs(xx) - Abs(Standard_ccd_X)) > 5 And Abs(Abs(yy) - Abs(Standard_ccd_Y)) > 5 Then
+					Print "ERR;XYU>;", uu
+					Return_code$ = "ERR;CCDERROR;U_is_More"
+					Exit Function
+				EndIf
+			Else
+				Print "Vision fail"
+				Off Glued
+				Return_code$ = "ERR;CCDERROR"
+				Exit Function
+			EndIf
+	EndIf
+
+	Print "X:", xx, ";Y:", yy, ";U:", uu '相機補正+原點(產品原點300+現在產品編號(EX:現在是產品1,就是300+1=301))
+       Local 7, XY(xx + CX(P(300 + Now_product)) + Glued_mid_X, yy + CY(P(300 + Now_product)) + Glued_mid_Y, 0, 0)
+		Tool 1
+		Select Now_product
+			Case 0
+				Line_high = 0.9
+				Jump LJM(P(Start_move + 20) +Y(1) +Z(0) :U(0)) CP '到起始位置，此起始點是原點跟終點的中間
+				Move LJM(P(Start_move + 20) +Y(1) +Z(Thick_Conveyor))
+		    	AccelS Speed_CR, Speed_CR '加減速提升到最快得走弧線
+				CP On '開啟連續動作
+				If Glued_Case = False Then '開始塗膠
+					Exit Function
+				EndIf
+				SpeedS Speed_LN '直線速度
+		        Move LJM(P(Start_move) +X(Out_side_Y / 2) +Y(Out_side_Y) +Z(Thick_Conveyor)) '從起始位置往原點開始塗膠
+				SpeedS Speed_CR '轉彎速度
+                Arc LJM(P(Start_move + 1) +Y(0.3) +Z(Thick_Conveyor)), LJM(P(Start_move + 2) +X(Out_side_X) +Y(0.3) +Z(Thick_Conveyor))   '圓弧P102圓中繼點
+		        Arc LJM(P(Start_move + 3) -X(0.2) +Z(Thick_Conveyor)), LJM(P(Start_move + 4) -X(Out_side_X / 2) +Z(Thick_Conveyor))
+				SpeedS Speed_LN
+		        Move LJM(P(Start_move + 5) -X(Out_side_X / 2) +Z(Thick_Conveyor))
+				SpeedS Speed_CR
+		        Arc LJM(P(Start_move + 6) -X(Out_side_X / 2) +Z(Thick_Conveyor)), LJM(P(Start_move + 7) -X(Out_side_X) -Y(0.3) +Z(Thick_Conveyor)) '+0.5
+		        Arc LJM(P(Start_move + 8) -Y(0.3) +Z(Thick_Conveyor)), LJM(P(Start_move + 9) -Y(Out_side_Y) +Z(Thick_Conveyor)) '+0.5
+				SpeedS Speed_LN
+				Move LJM(P(Start_move + 10) -X(Out_side_Y / 2) -Y(Out_side_Y) +Z(Thick_Conveyor))
+				SpeedS Speed_CR
+		        Arc LJM(P(Start_move + 11) -Y(0.3) +Z(Thick_Conveyor)), LJM(P(Start_move + 12) -X(0.1) -Y(0.3) +Z(Thick_Conveyor))
+		        Arc LJM(P(Start_move + 13) +X(0.1) +Z(Thick_Conveyor)), LJM(P(Start_move + 14) +X(Out_side_X / 2) +Z(Thick_Conveyor))
+				SpeedS Speed_LN
+				Move LJM(P(Start_move + 15) +X(Out_side_X / 2) +Z(Thick_Conveyor))
+				SpeedS Speed_CR
+		        Arc LJM(P(Start_move + 16) +X(Out_side_X / 2) +Z(Thick_Conveyor)), LJM(P(Start_move + 17) +X(Out_side_X) +Y(0.3) +Z(Thick_Conveyor))
+		        Arc LJM(P(Start_move + 18) +Y(0.3) +Z(Thick_Conveyor)), LJM(P(Start_move + 19) +Y(Out_side_Y) +Z(Thick_Conveyor)) CP
+				SpeedS Speed_LN
+				Move LJM(P(Start_move + 20) -X(Out_side_Y / 2) +Y(Out_side_Y) +Z(Thick_Conveyor))
+		         If GluedClose_Case = False Then
+					Exit Function
+				EndIf
+				SpeedS Speed_LN / 2
+				Move LJM(P(Start_move + 20) -X(2) +Y(Out_side_Y) +Z(Thick_Conveyor))
+				CP Off
+				Move Here +Z(1)
+				SpeedS Speed_LN
+		        Move LJM(P(Start_move + 21) :Y(CY(P(Start_move))) +Y(Out_side_Y) :Z(CZ(Here)))
+		        Int32 ZX1
+				If CZ(Here) < 2 Then '防止上升超過極限
+					ZX1 = 0
+				Else
+					ZX1 = 1
+				EndIf
+				Move LJM(P(Start_move + 21) :Y(CY(P(Start_move))) +Z(Thick_Conveyor + ZX1 + 1))
+		        Move LJM(P(Start_move + 21) :Y(CY(P(Start_move))) -Y(2.5) +Z(Thick_Conveyor + ZX1 + 1))
+				'三條直線
+				
+				Move LJM(P(Start_move + 21) :Y(CY(P(Start_move))) -Y(2.5) +Z(Thick_Conveyor + ZX1))
+				Move LJM(P(Start_move + 21) :Y(CY(P(Start_move))) -Y(2.5) +Z(Thick_Conveyor - Line_high)) CP
+				If Glued_Case = False Then
+					Exit Function
+				EndIf
+		        Move LJM(P(Start_move + 21) +Y(3) +Y(2.5) +Z(Thick_Conveyor - Line_high)) CP
+				If GluedClose_Case = False Then
+					Exit Function
+				EndIf
+				Move LJM(P(Start_move + 21) +Y(2.5) +Z(Thick_Conveyor - Line_high - 0.2))
+				Wait 0.1
+				
+				Move LJM(P(Start_move + 22) +Y(2.5) +Z(Thick_Conveyor - Line_high)) CP
+				If Glued_Case = False Then
+					Exit Function
+				EndIf
+				Move LJM(P(Start_move + 22) :Y(CY(P(Start_move))) -Y(3) -Y(2.5) +Z(Thick_Conveyor - Line_high)) CP
+				If GluedClose_Case = False Then
+					Exit Function
+				EndIf
+				Move LJM(P(Start_move + 22) :Y(CY(P(Start_move))) -Y(2.5) +Z(Thick_Conveyor - Line_high - 0.2))
+				Wait 0.1
+				
+				Move LJM(P(Start_move + 23) :Y(CY(P(Start_move))) -Y(2.5) +Z(Thick_Conveyor - Line_high)) CP
+				If Glued_Case = False Then
+					Exit Function
+				EndIf
+				Move LJM(P(Start_move + 23) +Y(3) +Y(2.5) +Z(Thick_Conveyor - Line_high)) CP
+				If GluedClose_Case = False Then
+					Exit Function
+				EndIf
+				Move LJM(P(Start_move + 23) +Y(2.5) +Z(Thick_Conveyor - Line_high - 0.2))
+			Case 1
+				
+		Send
+		
+		Wait 0.1
+		Tool 0
+		Call DefSpeed
+	Else
+		Print "Vision fail"
+		Off Glued
+		Return_code$ = "ERR;CCDERROR"
+		Exit Function
+	EndIf
+	'塗膠結束		
+
+	Move Here :Z(0)
+	Jump LJM(CCD_PL)
+	Tool 0
+	Print "塗膠完成"
+	Return_code$ = "RunFinish;GLUE;" + Str$(xx) + ";" + Str$(yy) + ";" + Str$(uu)
+	Exit Function
+		handle:
+			Off Glued
+			Print "Error GLUE"
+			Print "ERR;", SysErr, ";GLUE"
+			Return_code$ = "ERR;" + Str$(SysErr)
+			If ChkNet(205) > 0 Then
+				Print 205, "ERR;", SysErr
+			EndIf
+			If ChkNet(211) > 0 Then
+				Print #211, "ERR;", SysErr
+			EndIf
+		Reset
+		Power High
+		Call DefSpeed
+Fend
+Function GoHome_Gld '復歸
+	'Robot 2
+	IsBuzy = True
+	Speed 10
+	SpeedS 50
+	Home
+	Power High
+	Call DefSpeed
+	Return_code$ = "RunFinish;HOME"
+	Print Return_code$
+Fend
+Function tcpipcmd_Gld
+	Integer product_num
+	OnErr GoTo handle
+	If False Then
+		handle:
+			Print "Error occer"
+			Print "ERR:", SysErr
+			If ChkNet(205) > 0 Then
+				Print #205, "ERR;", SysErr
+			EndIf
+		Reset
+		Power High
+		Call DefSpeed
+	EndIf
+	Do
+		 OpenNet #205 As Server
+		 WaitNet #205, 60
+		 If TW = True Then
+		 	Print "Time Out"
+		 Else
+		 	Print " #205 Connected"
+		 	Do
+            	If (PauseOn = True Or SafetyOn = True) Then
+            		If ChkNet(205) > 0 Then
+				 		Line Input #205, cmd_plu$
+				 		If Len(cmd_plu$) > 0 And Trim$(cmd_plu$) <> "" Then
+				 				String toks12$(0)
+			 					ParseStr cmd_plu$, toks12$(), ";"
+			 					Select toks12$(0)
+						 		Case "Resume"
+							 		Print #205, "Resume"
+							 		Print "Continue"
+									Cont
+									cmd_plu$ = ""
+									Exit Do
+						 		Default
+				 					Print #205, "ERR,Cmd_NotFound"
+				 					cmd_plu$ = ""
+				 			Send
+				 		EndIf
+			 		EndIf
+            	Else
+				 	If (ChkNet(205) > 0 And IsBuzy = False) Then '連線埠有資料
+				 		If Pass_Tcpip = False Then
+					 			Line Input #205, cmd$
+					 		EndIf
+				 		Wait 0.5
+					 	If Len(cmd$) > 0 And cmd$ <> "" Then
+				 			Print "received '", cmd$, "' from PC"
+				 			String toks1$(0)
+				 			ParseStr cmd$, toks1$(), ";"
+	                        Select toks1$(0)
+				 			'Select Left$(cmd$, 4)
+				 				Case "PROD" '讀產品
+				 					'Print #205, "cmd;received;", toks1$(0)
+				 					'product_num = Val(Mid$(cmd$, 5))
+				 					product_num = Val(toks1$(1))
+				 					Call Product_Setting(product_num)
+				 				Case "SPIT" '吐膠
+				 					'Print #205, "cmd;received;", toks1$(0)
+				 					If product_load = True Then
+				 						Call MovetoSpit_Gld
+				 					Else
+				 						Return_code$ = "ERR;Product No Load"
+				 					EndIf
+				 				Case "NEED" '針位
+				 					'Print #205, "cmd;received;", toks1$(0)
+				 					If product_load = True Then
+				 						Call MovetoNeedle_Gld
+				 					Else
+				 						Return_code$ = "ERR;Product No Load"
+				 					EndIf
+				 				Case "GLUE" '塗膠
+				 					'Print #205, "cmd;received;", toks1$(0)
+				 					If product_load = True Then
+				 						Call Move_Test_Glued
+				 					Else
+				 						Return_code$ = "ERR;Product No Load"
+				 					EndIf
+				 				Case "MANUALGLUE"
+									Call Move_OnTable2
+'								Select Val(toks1$(1))
+'				 						Case 0
+'											Call Move_OnTable2
+'										Case 1
+'											Call Move_OnTable3(Val(toks1$(1)))
+'										Default
+'				 							Print #205, "ERR;Cmd_NotFound"
+'									Send
+				 				Case "TKIF"
+				 					If (TaskInfo(4, 3)) < 1 Then Print #205, "Task;NotRun"
+				 					If (TaskInfo(4, 3)) = 1 Then Print #205, "Task;Run"
+									If (TaskInfo(4, 3)) = 2 Then Print #205, "Task;Wait"
+									If (TaskInfo(4, 3)) = 3 Then Print #205, "Task;Pause"
+									If (TaskInfo(4, 3)) = 4 Then Print #205, "Task;Stop"
+									If (TaskInfo(4, 3)) = 5 Then Print #205, "Task;Error"
+					 			Case "SET_PURGE_GLUE_TIME"
+				 					Glue_Time = Val(toks1$(1))
+				 				Case "SetShift"
+	                                'Print #205, "cmd;received;", toks1$(0)
+				 					Call Set_XYZU(Val(toks1$(1)), Val(toks1$(2)), Val(toks1$(3)), Val(toks1$(4)))
+				 				Case "GetShift"
+				 					'Print #205, "cmd;received;", toks1$(0)
+				 					Call Get_XYZU
+'				 				Case "SetModle"
+'				 					 'Print #205, "cmd;received;", toks1$(0)
+'				 					 'L W R L1 L2 L3
+'				 					Call WLsetting(Val(toks1$(1)), Val(toks1$(2)), Val(toks1$(3)), Val(toks1$(4)), Val(toks1$(5)), Val(toks1$(6)))
+				 				Case "HOME" '復歸
+				 					'Print #205, "cmd;received;", toks1$(0)
+				 					Call GoHome_Gld
+				 				Case "PowerLow"
+				 					Power Low
+				 					Return_code$ = "RunFinish;POWERLOW"
+				 				Case "PowerHigh"
+				 					Power High
+				 					Return_code$ = "RunFinish;POWERHIGH"
+				 				Case "PowerType"
+				 					If Power = 0 Then
+										Return_code$ = "Low Power Mode"
+									EndIf
+									If Power = 1 Then
+										Return_code$ = "High Power Mode"
+									EndIf
+				 				Default
+				 					Print #205, "ERR;Cmd_NotFound"
+				 			Send
+				 		'	IsBuzy = False
+				 			
+					 	cmd$ = ""
+	                    EndIf
+				 	EndIf
+				 	If TaskInfo(4, 3) < 1 Or TaskInfo(4, 3) > 3 Then
+				 		IsBuzy = False
+				 	EndIf
+				 	If Return_code$ <> "" Then
+			 			Print #205, Return_code$
+			 			Return_code$ = ""
+			 		EndIf
+			 		
+				 	If ChkNet(205) = -3 Then
+				 		CloseNet #205
+				 		Print "Disconnected"
+				 		Exit Do
+				 	EndIf
+			 	EndIf
+			 Loop
+		 EndIf
+	Loop
+Fend
+Function MovetoNeedle_Gld
+	Real mid_1X, mid_1Y, val_1X, val_1Y, fin_1X, fin_1Y, fin_1Z
+	Tool 0
+	OnErr GoTo handle
+	'Call Speed_SuperLow
+	SpeedS 300
+	MemOff (RUN1_TCPX_1); MemOff (RUN1_TCPX_2);	MemOff (RUN1_TCPY_1); MemOff (RUN1_TCPY_2);
+	MemOff (RUN1_TCPZ_1); MemOff (RUN1_TCPZ_2)
+
+	Jump Circle_P5 :Z(0)
+	Call Speed_SuperLow2
+
+	Print "參考圓心位置：", Circle_P5
+	Move Circle_P5 :Z(-10)						'先往P5位置往上抬
+	Move Circle_P5 +Z(-2)								'跑圓心
+	Circle1_Nega_P6 = Circle_P5 -Y(10) +Z(-2)			'圓兩邊設定
+	Circle1_Posi_P7 = Circle_P5 +Y(10) +Z(-2)
+	
+	Move Circle1_Nega_P6 +X(0.01)				'故意跑到圓兩邊偏一點，可試著改Z?
+
+	Call Speed_SuperLow
+	Xqt RUN1_X; Xqt RUN1_Y						'背景抓TCP點位
+	Arc Circle1_Posi_P7, Circle1_Nega_P6		'執行圓跑點
+	SavePoints "robot1.pts"
+	Wait MemSw(RUN1_TCPX_1) = On And MemSw(RUN1_TCPY_1) = On, 20
+	If TW = On Or (TaskState(RUN1_X) = 1 Or TaskState(RUN1_Y)) = 1 Then
+ 		Quit RUN1_X; Quit RUN1_Y
+ 		Return_code$ = "ERR;Sensor XY No Find"
+ 		Exit Function
+	EndIf
+
+	'列印第一圓的4個點X,Y，之後要結合象限
+	Print CR
+	Print "P1-X(first)=	", CX(RUN1_TCPY2_P14), "	P1-Y(first)=	", CY(RUN1_TCPX1_P11)
+	Print "P2-X(second)=	", CX(RUN1_TCPY1_P12), "	P2-Y(second)=	", CY(RUN1_TCPX2_P13)
+	
+	'取第一圓的圓心	
+	'碰到TCPX是取Y值，碰到TCPY是取X值
+	mid_1X = (CX(RUN1_TCPY2_P14) + CX(RUN1_TCPY1_P12)) / 2
+	mid_1Y = (CY(RUN1_TCPX1_P11) + CY(RUN1_TCPX2_P13)) / 2
+'	If GetLinePara = False Then
+'		Print "【【【【RUN ERROR】】】】"
+'		Print #211, "EER,RUN ERROR"
+'		Exit Function
+'	EndIf
+'	mid_1X = MiD_XX
+'	mid_1Y = MiD_YY
+	fin_1Z = CZ(Circle_P5)
+	Print "mid_1X=		", mid_1X, "	mid_1Y=		", mid_1Y, "	fin_1Z= ", fin_1Z
+	
+	If Abs(CX(RUN1_mid) - CX(Circle_P5)) > 5 Then '3
+		Print "【【【【RUN ERROR】】】】"
+		Print #205, "ERR,X>"
+		Return_code$ = "ERR,X>"
+		Exit Function
+	EndIf
+	If Abs(CY(RUN1_mid) - CY(Circle_P5)) > 5 Then '3
+		Print "【【【【RUN ERROR】】】】"
+		Print #205, "ERR;Y>"
+			Return_code$ = "ERR;Y>"
+		Exit Function
+	EndIf
+	Call Speed_SuperLow2
+	Move Here :X(mid_1X) :Y(mid_1Y)
+	RUN1_mid = Here
+	'Move Here +Z(-2)
+	Call Speed_SuperLow
+	Xqt RUN1_Z
+	Move Here :Z(-20)
+	Move Here :Z(CZ(RUN1_mid))
+	Wait MemSw(RUN1_TCPZ_1) = On, 20
+	If TW = On Or TaskState(RUN1_Z) = 1 Then
+ 		Quit RUN1_Z
+ 		Return_code$ = "ERR;Sensor Z No Find"
+ 		Exit Function
+	EndIf
+	Wait 0.5
+	Print "mid_1X=		", mid_1X, "	mid_1Y=		", mid_1Y, "	fin_1Z= ", CZ(RUN1_TCPZ1_P15)
+	If Abs(CZ(RUN1_TCPZ1_P15) - CZ(Circle_P5)) < 5 Then 'Abs(CX(RUN1_mid) - CX(Circle_P5)) < 1 And Abs(CY(RUN1_mid) - CY(Circle_P5)) < 1 
+		'TLSet 1, XY(CX(RUN1_mid) - CX(Circle_P5), CY(RUN1_mid) - CY(Circle_P5), CZ(RUN1_TCPZ1_P15) - CZ(Circle_P5), 0)
+		NEW_Circle_P8 = Here :X(CX(RUN1_mid)) :Y(CY(RUN1_mid)) :Z(CZ(RUN1_TCPZ1_P15) - 0.1)
+	Else
+		Print "X", Str$(CX(RUN1_mid) - CX(Circle_P5)), ",Y,", Str$(CY(RUN1_mid) - CY(Circle_P5)), ",Z,", Str$((CZ(RUN1_TCPZ1_P15) - CZ(Circle_P5)))
+		Print "【【【【RUN ERROR】】】】"
+		Print #205, "ERR;XYZ>"
+		Exit Function
+	EndIf
+	SpeedS 200
+	Move NEW_Circle_P8
+	'STEP2
+	If Need_twoStep = False Then
+		Exit Function
+	EndIf
+	SpeedS 200
+	Move NEW_Circle_P8
+	Call DefSpeed
+	'Pause
+	Print "【【【【RUN1 ok】】】】"
+	SavePoints "robot1.pts"
+	'Return_code$ = "RunFinish;NEED"
+	Exit Function
+	handle:
+		Print "Error NEED1"
+		Print "ERR;", SysErr
+		If ChkNet(211) > 0 Then
+			Print #211, "ERR;", SysErr
+		EndIf
+	Reset
+	Power High
+	Call DefSpeed
+Fend
+Function Need_twoStep As Boolean
+	Real mid_1X, mid_1Y, val_1X, val_1Y, fin_1X, fin_1Y, fin_1Z
+	OnErr GoTo handle
+	Need_twoStep = True
+	Circle1_Nega_P6 = NEW_Circle_P8 -Y(10) 			'圓兩邊設定
+	Circle1_Posi_P7 = NEW_Circle_P8 +Y(10)
+	Call Speed_SuperLow2
+	Move Circle1_Nega_P6 +X(0.01)				'故意跑到圓兩邊偏一點，可試著改Z?
+	Call Speed_SuperLow
+	Xqt RUN1_X; Xqt RUN1_Y						'背景抓TCP點位
+	Arc Circle1_Posi_P7, Circle1_Nega_P6		'執行圓跑點
+	SavePoints "robot1.pts"
+	Wait MemSw(RUN1_TCPX_1) = On And MemSw(RUN1_TCPY_1) = On, 20
+	If TW = On Or (TaskState(RUN1_X) = 1 Or TaskState(RUN1_Y)) = 1 Then
+ 		Quit RUN1_X; Quit RUN1_Y
+ 		Return_code$ = "ERR;Sensor XY No Find"
+ 		Need_twoStep = False
+ 		Exit Function
+	EndIf
+
+	'列印第一圓的4個點X,Y，之後要結合象限
+	Print CR
+	Print "P1-X(first)=	", CX(RUN1_TCPY2_P14), "	P1-Y(first)=	", CY(RUN1_TCPX1_P11)
+	Print "P2-X(second)=	", CX(RUN1_TCPY1_P12), "	P2-Y(second)=	", CY(RUN1_TCPX2_P13)
+	
+	'取第一圓的圓心	
+	'碰到TCPX是取Y值，碰到TCPY是取X值
+	mid_1X = (CX(RUN1_TCPY2_P14) + CX(RUN1_TCPY1_P12)) / 2
+	mid_1Y = (CY(RUN1_TCPX1_P11) + CY(RUN1_TCPX2_P13)) / 2
+'	If GetLinePara = False Then
+'		Print "【【【【RUN ERROR】】】】"
+'		Print #211, "EER,RUN ERROR"
+'		Exit Function
+'	EndIf
+'	mid_1X = MiD_XX
+'	mid_1Y = MiD_YY
+	fin_1Z = CZ(NEW_Circle_P8)
+	Print "mid_1X=		", mid_1X, "	mid_1Y=		", mid_1Y, "	fin_1Z= ", fin_1Z
+	
+	If Abs(CX(RUN1_mid) - CX(NEW_Circle_P8)) > 1 Then
+		Print "【【【【RUN ERROR】】】】"
+		Need_twoStep = False
+		Print #205, "ERR;X>1"
+		Exit Function
+	EndIf
+	If Abs(CY(RUN1_mid) - CY(NEW_Circle_P8)) > 1 Then
+		Print "【【【【RUN ERROR】】】】"
+		Need_twoStep = False
+		Print #205, "ERR;Y>1"
+		Exit Function
+	EndIf
+	Move Here :X(mid_1X) :Y(mid_1Y)
+	RUN1_mid = Here
+	Move Here +Z(-2)
+	Call Speed_SuperLow
+	Xqt RUN1_Z
+	Move Here :Z(-20)
+	Move Here :Z(CZ(RUN1_mid) - 2)
+	Wait MemSw(RUN1_TCPZ_1) = On, 20
+	If TW = On Or TaskState(RUN1_Z) = 1 Then
+ 		Quit RUN1_Z
+ 		Return_code$ = "ERR;Sensor Z No Find"
+ 		Need_twoStep = False
+ 		Exit Function
+	EndIf
+	Wait 0.5
+	
+	Print "mid_1X=		", mid_1X, "	mid_1Y=		", mid_1Y, "	fin_1Z= ", CZ(RUN1_TCPZ1_P15)
+	If Abs(CZ(RUN1_TCPZ1_P15) - CZ(NEW_Circle_P8)) < 3 Then ' Abs(CX(RUN1_mid) - CX(NEW_Circle_P8)) < 1 And Abs(CY(RUN1_mid) - CY(NEW_Circle_P8)) < 1 And
+		TLSet 1, XY(-(CX(RUN1_mid) - CX(Circle_P5)), -(CY(RUN1_mid) - CY(Circle_P5)), -(CZ(RUN1_TCPZ1_P15) - CZ(Circle_P5)), 0)
+		'NEW_Circle_P8 = Here :X(CX(RUN1_mid)) :Y(CY(RUN1_mid)) :Z(CZ(RUN1_TCPZ1_P15) - 0.1)
+		Print "TOOL X", Str$(-(CX(RUN1_mid) - CX(Circle_P5))), ",Y,", Str$(-(CY(RUN1_mid) - CY(Circle_P5))), ",Z,", Str$(-((CZ(RUN1_TCPZ1_P15) - CZ(Circle_P5))))
+		Return_code$ = "RunFinish;NEED;" + Str$(-(CX(RUN1_mid) - CX(Circle_P5))) + ";" + Str$(-(CY(RUN1_mid) - CY(Circle_P5))) + ";" + Str$(-((CZ(RUN1_TCPZ1_P15) - CZ(Circle_P5))))
+	Else
+		Print "TOOL X", Str$(CX(RUN1_mid) - CX(Circle_P5)), ",Y,", Str$(CY(RUN1_mid) - CY(Circle_P5)), ",Z,", Str$((CZ(RUN1_TCPZ1_P15) - CZ(Circle_P5)))
+		
+		Print "【【【【RUN ERROR】】】】"
+		Print #205, "ERR;XYZ>1"
+		Need_twoStep = False
+		Exit Function
+	EndIf
+	Exit Function
+	handle:
+		Need_twoStep = False
+		Print "Error NEED2"
+		Print "ERR;", SysErr, ";NEED2"
+				Return_code$ = "ERR;" + Str$(SysErr)
+			If ChkNet(205) > 0 Then
+				Print 205, "ERR;", SysErr
+			EndIf
+	Reset
+	Power High
+	Call DefSpeed
+Fend
+Function GetLinePara As Boolean
+	Double MX12, MX34, LPK1, LPK2, LPB1, LPB2
+	MX12 = CX(RUN1_TCPY2_P14) - CX(RUN1_TCPY1_P12)
+
+	If MX12 = 0 Then
+		LPK1 = 10000
+		LPB1 = CY(RUN1_TCPY1_P12) - LPK1 * CX(RUN1_TCPY1_P12)
+	Else
+		LPK1 = (CY(RUN1_TCPY2_P14) - CY(RUN1_TCPY1_P12)) / (CX(RUN1_TCPY2_P14) - CX(RUN1_TCPY1_P12))
+		LPB1 = CY(RUN1_TCPY1_P12) - LPK1 * CX(RUN1_TCPY1_P12)
+	EndIf
+	
+	MX34 = CX(RUN1_TCPX2_P13) - CX(RUN1_TCPX1_P11)
+
+	If MX34 = 0 Then
+		LPK2 = 10000
+		LPB2 = CY(RUN1_TCPX1_P11) - LPK2 * CX(RUN1_TCPX1_P11)
+	Else
+		LPK2 = (CY(RUN1_TCPX2_P13) - CY(RUN1_TCPX1_P11)) / (CX(RUN1_TCPX2_P13) - CX(RUN1_TCPX1_P11))
+		LPB2 = CY(RUN1_TCPX1_P11) - LPK2 * CX(RUN1_TCPX1_P11)
+	EndIf
+	MiD_XX = 0; MiD_YY = 0
+	If (Abs(LPK1 - LPK2) > 0.5) Then
+		MiD_XX = (LPB2 - LPB1) /(LPK1 - LPK2)
+		MiD_YY = LPK1 * MiD_XX + LPB1
+		GetLinePara = True
+	Else
+		GetLinePara = False
+	EndIf
+Fend
+Function RUN1_X
+Do
+	If Sw(TCPX) = On Then
+		buf_x1 = RealPos; MemOn RUN1_TCPX_1 '傳回目前座標
+		Wait Sw(TCPX) = Off
+		buf_x2 = RealPos
+		
+		'RUN1_TCPX1_P11 = RealPos :X((CX(buf_x1) + CX(buf_x2)) / 2) :Y((CY(buf_x1) + CY(buf_x2)) / 2) :Z((CZ(buf_x1) + CZ(buf_x2)) / 2)
+		RUN1_TCPX1_P11 = RealPos :X(CX(buf_x2)) :Y(CY(buf_x2)) :Z(CZ(buf_x2))
+		'Print "[XXX]BUF1=", buf_x1	'計算用
+		'Print "[XXX]BUF2=", buf_x2	'計算用
+		Print "RUN1_X1(P11)=", RUN1_TCPX1_P11
+		'Pause
+		Do
+			If Sw(TCPX) = On Then
+				buf_x1 = RealPos; MemOn RUN1_TCPX_2
+				Wait Sw(TCPX) = Off
+				buf_x2 = RealPos
+				'RUN1_TCPX2_P13 = RealPos :X((CX(buf_x1) + CX(buf_x2)) / 2) :Y((CY(buf_x1) + CY(buf_x2)) / 2) :Z((CZ(buf_x1) + CZ(buf_x2)) / 2)
+				RUN1_TCPX2_P13 = RealPos :X(CX(buf_x2)) :Y(CY(buf_x2)) :Z(CZ(buf_x2))
+				'Print "[XXX]BUF1=", buf_x1	'計算用
+				'Print "[XXX]BUF2=", buf_x2	'計算用
+				Print "RUN1_X2(P13)=", RUN1_TCPX2_P13
+				'Pause
+					
+					Quit RUN1_X
+			EndIf
+		Loop
+	EndIf
+Loop
+	
+Fend
+Function RUN1_Y
+Do
+	If Sw(TCPY) = On Then
+		buf_y1 = RealPos; MemOn RUN1_TCPY_1
+		Wait Sw(TCPY) = Off
+		buf_y2 = RealPos;
+		
+		'RUN1_TCPY1_P12 = RealPos :X((CX(buf_y1) + CX(buf_y2)) / 2) :Y((CY(buf_y1) + CY(buf_y2)) / 2) :Z((CZ(buf_y1) + CZ(buf_y2)) / 2)
+		RUN1_TCPY1_P12 = RealPos :X(CX(buf_y2)) :Y(CY(buf_y2)) :Z(CZ(buf_y2))
+		'Print "[XXX]BUF1=", buf_y1	'計算用
+		'Print "[XXX]BUF2=", buf_y2	'計算用
+		Print "RUN1_Y1(P12)=", RUN1_TCPY1_P12
+		'Pause
+		Do
+			If Sw(TCPY) = On Then
+				buf_y1 = RealPos; MemOn RUN1_TCPY_2
+				Wait Sw(TCPY) = Off
+				buf_y2 = RealPos
+				'RUN1_TCPY2_P14 = RealPos :X((CX(buf_y1) + CX(buf_y2)) / 2) :Y((CY(buf_y1) + CY(buf_y2)) / 2) :Z((CZ(buf_y1) + CZ(buf_y2)) / 2)
+				RUN1_TCPY2_P14 = RealPos :X(CX(buf_y2)) :Y(CY(buf_y2)) :Z(CZ(buf_y2))
+				'Print "[XXX]BUF1=", buf_y1	'計算用
+				'Print "[XXX]BUF2=", buf_y2	'計算用
+				Print "RUN1_Y2(P14)=", RUN1_TCPY2_P14
+				'Pause
+
+'				Wait Sw(TCPY) = Off
+				Quit RUN1_Y
+			EndIf
+		Loop
+	EndIf
+Loop
+	
+Fend
+Function RUN1_Z
+Do
+	If Sw(TCPY) = On And Sw(TCPX) = On Then
+   		Wait Sw(TCPY) = Off And Sw(TCPX) = Off
+		buf_z1 = RealPos; MemOn RUN1_TCPZ_1
+		Print "Z1=", buf_z1
+		Wait Sw(TCPY) = On And Sw(TCPX) = On
+		buf_z2 = RealPos;
+		Print "Z2=", buf_z2
+		RUN1_TCPZ1_P15 = RealPos :Z((CZ(buf_z1) + CZ(buf_z2)) / 2)
+		'Print "[XXX]BUF1=", buf_y1	'計算用
+		'Print "[XXX]BUF2=", buf_y2	'計算用
+		Print "RUN1_Z1(P15)=", RUN1_TCPZ1_P15
+		'Pause
+		Quit RUN1_Z
+	EndIf
+Loop
+	
+Fend
+'F_Setting
+'F_Initial.prg    '定義初始狀態
+'#include "Msg_Table.inc"
+'#include "D_Global.inc"
+Function Initial
+	
+'====Robot Reset=============================================================	
+	Motor On
+'	ThreeT = 0; agv_result = False
+	Tool 0
+
+	Wait Motor = On
+	Power High
+	Speed 3; 	Accel 3, 3
+	SpeedS 50; 	AccelS 300, 300
+'====Tool Setting===============================================================
+	'設置Tool的重量和慣性參數
+	'Inertia [負載慣性]kgm^2, [離心率]mm
+	Weight 2.5
+	Inertia 0.05, 40
+Fend
+'====Robot Speed================================================================	
+Function DefSpeed
+	SP_SDef = 500
+	SP_Def = 30
+	Speed SP_Def
+	Accel SP_Def, SP_Def
+	SpeedS SP_SDef
+	AccelS 500, 500
+Fend
+
+Function Speed_SuperLow
+	'Speed 3; Accel 3, 3		'base low ok
+	'SpeedS 5; AccelS 100, 100	'base low ok
+	Speed 1; Accel 1, 1			'base power high
+	SpeedS 5; AccelS 100, 100	'base power high
+Fend
+Function Speed_SuperLow2
+	'Speed 3; Accel 3, 3		'base low ok
+	'SpeedS 5; AccelS 100, 100	'base low ok
+	Speed 1; Accel 1, 1			'base power high
+	SpeedS 10; AccelS 100, 100	'base power high
+Fend
+Function Speed_Low		'base power high
+	Speed 3; Accel 3, 3
+	SpeedS 40; AccelS 300, 300
+Fend
+'Function CLR_PP
+'    Integer pp, NewPP
+'    start_pt = 130; end_pt = start_pt + 19;
+'	For pp = start_pt To end_pt
+'		NewPP = pp - 30
+'		P(NewPP) = XY(CX(P(pp)) - CX(P(start_pt)), CY(P(pp)) - CY(P(start_pt)), CZ(Obj_PL), 0)
+'	Next
+'    P(NewPP + 1) = XY((CX(P(NewPP - 19)) + CX(P(NewPP))) / 2, (CY(P(NewPP - 19)) + CY(P(NewPP))) / 2, CZ(P(NewPP - 19)), 0)
+''	P(NewPP + 2) = XY(CX(P(start_pt)), CY(P(start_pt)), CZ(P(start_pt)), 0)
+''	P(NewPP + 3) = XY(CX(P(start_pt)), CY(P(start_pt)), CZ(P(start_pt)), 0)
+''	P(NewPP + 4) = XY(CX(P(start_pt)), CY(P(start_pt)), CZ(P(start_pt)), 0)
+'	P(NewPP + 2) = XY(CX(P(NewPP - 19)), CY(P(NewPP - 9)), CZ(P(NewPP - 19)), 0)
+'	P(NewPP + 3) = XY(CX(P(NewPP - 19)), CY(P(NewPP - 9)), CZ(P(NewPP - 19)), 0)
+'	P(NewPP + 4) = XY(CX(P(NewPP - 19)), CY(P(NewPP - 9)), CZ(P(NewPP - 19)), 0)
+'		SavePoints "robot1.pts"
+'	'設定完成
+'Fend
+'		SpeedS 30
+'		Move LJM(P160 +Z(Thick_Conveyor))
+'		SpeedS 1000
+'		Arc LJM(P161 +Z(Thick_Conveyor)), LJM(P162 +Z(Thick_Conveyor))   '圓弧P102圓中繼點
+'		Arc LJM(P163 +Z(Thick_Conveyor)), LJM(P164 +Z(Thick_Conveyor))
+'		SpeedS 30
+'		Move LJM(P165 +Z(Thick_Conveyor))
+'		SpeedS 1000
+'		Arc LJM(P166 +Z(Thick_Conveyor)), LJM(P167 +Y(0.5) +Z(Thick_Conveyor)) '+0.5
+'		Arc LJM(P168 +Z(Thick_Conveyor)), LJM(P169 +Y(0.5) +Z(Thick_Conveyor)) '+0.5
+'		SpeedS 30
+'		Move LJM(P170 +Y(0.05) +Z(Thick_Conveyor))
+'		SpeedS 1000
+'		Arc LJM(P171 +Z(Thick_Conveyor)), LJM(P172 -X(0.6) +Y(0.4) +Z(Thick_Conveyor))
+'		Arc LJM(P173 +Z(Thick_Conveyor)), LJM(P174 -X(0.6) +Z(Thick_Conveyor))
+'		SpeedS 30
+'		Move LJM(P175 -X(0.2) +Z(Thick_Conveyor))
+'		SpeedS 1000
+'		Arc LJM(P176 +Z(Thick_Conveyor)), LJM(P177 -X(0.4) -Y(0.3) +Z(Thick_Conveyor))
+'		Arc LJM(P178 +Z(Thick_Conveyor)), LJM(P179 -Y(0.3) +Z(Thick_Conveyor))
+'		SpeedS 30
+'		Move LJM(P190 +Z(Thick_Conveyor))
+'		Off Glued
+'		Move LJM(P160 +Y(-0.5) +Z(Thick_Conveyor))
+'		CP Off
+'Function WLsetting(S_W As Real, S_L As Real, S_R As Real, S_L1 As Real, S_L2 As Real, S_L3 As Real)
+'	P130 = XY(-(S_W) / 2 + S_R, S_L / 2, 0, 0)
+'	P131 = XY(-(S_W) / 2 + S_R + S_R * Cos(DegToRad(90 + 22.5)), S_L / 2 - S_R + S_R * Sin(DegToRad(90 + 22.5)), 0, 0)
+'	P132 = XY(-(S_W) / 2 + S_R + S_R * Cos(DegToRad(90 + 45)), S_L / 2 - S_R + S_R * Sin(DegToRad(90 + 45)), 0, 0)
+'	P133 = XY(-(S_W) / 2 + S_R + S_R * Cos(DegToRad(90 + 67.5)), S_L / 2 - S_R + S_R * Sin(DegToRad(90 + 67.5)), 0, 0)
+'    P134 = XY(-(S_W) / 2, S_L / 2 - S_R, 0, 0)
+'	P135 = XY(-(S_W) / 2, -(S_L) / 2 + S_R, 0, 0)
+'	P136 = XY(-(S_W) / 2 + S_R + S_R * Cos(DegToRad(180 + 22.5)), -(S_L) / 2 + S_R + S_R * Sin(DegToRad(180 + 22.5)), 0, 0)
+'	P137 = XY(-(S_W) / 2 + S_R + S_R * Cos(DegToRad(180 + 45)), -(S_L) / 2 + S_R + S_R * Sin(DegToRad(180 + 45)), 0, 0)
+'	P138 = XY(-(S_W) / 2 + S_R + S_R * Cos(DegToRad(180 + 67.5)), -(S_L) / 2 + S_R + S_R * Sin(DegToRad(180 + 67.5)), 0, 0)
+'	P139 = XY(-(S_W) / 2 + S_R, -(S_L) / 2, 0, 0)
+'	P140 = XY((S_W) / 2 - S_R, -(S_L) / 2, 0, 0)
+'	P141 = XY((S_W) / 2 - S_R + S_R * Cos(DegToRad(270 + 22.5)), -(S_L) / 2 + S_R + S_R * Sin(DegToRad(270 + 22.5)), 0, 0)
+'	P142 = XY((S_W) / 2 - S_R + S_R * Cos(DegToRad(270 + 45.5)), -(S_L) / 2 + S_R + S_R * Sin(DegToRad(270 + 45)), 0, 0)
+'	P143 = XY((S_W) / 2 - S_R + S_R * Cos(DegToRad(270 + 67.5)), -(S_L) / 2 + S_R + S_R * Sin(DegToRad(270 + 67.5)), 0, 0)
+'	P144 = XY((S_W) / 2, -(S_L) / 2 + S_R, 0, 0)
+'	P145 = XY((S_W) / 2, (S_L) / 2 - S_R, 0, 0)
+'	P146 = XY((S_W) / 2 - S_R + S_R * Cos(DegToRad(22.5)), (S_L) / 2 - S_R + S_R * Sin(DegToRad(22.5)), 0, 0)
+'	P147 = XY((S_W) / 2 - S_R + S_R * Cos(DegToRad(45)), (S_L) / 2 - S_R + S_R * Sin(DegToRad(45)), 0, 0)
+'	P148 = XY((S_W) / 2 - S_R + S_R * Cos(DegToRad(67.5)), (S_L) / 2 - S_R + S_R * Sin(DegToRad(67.5)), 0, 0)
+'	P149 = XY((S_W) / 2 - S_R, (S_L) / 2, 0, 0)
+'	P150 = XY(0, (S_L) / 2, 0, 0)
+'	P151 = XY(S_L1 - (S_W / 2), -(S_L) / 2 + S_R, 0, 0)
+'	P152 = XY(S_L2 - (S_W / 2), -(S_L) / 2 + S_R, 0, 0)
+'	P153 = XY(S_L3 - (S_W / 2), -(S_L) / 2 + S_R, 0, 0)
+'	Integer I_pd, pp
+'	I_pd = 0;
+'
+'	For pp = start_pt To end_pt
+'		P(Start_move + I_pd) = XY(CX(P(pp)) - CX(P(start_pt)) - Glued_mid_X + CX(P(600 + Now_product)), CY(P(pp)) - CY(P(start_pt)) - Glued_mid_Y + CY(P(600 + Now_product)), CZ(Obj_PL) + CZ(P(600 + Now_product)), 0) /7
+'		I_pd = I_pd + 1
+'	Next
+'	Glued_mid_X = (CX(P(start_pt)) + CX(P(start_pt + 10))) / 2
+'	Glued_mid_Y = (CY(P(start_pt)) + CY(P(start_pt + 10))) / 2
+'	Return_code$ = "SetModle"
+'Fend
+
